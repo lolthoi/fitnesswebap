@@ -1,0 +1,149 @@
+﻿@model fitness.Models.AspNetUser
+
+<section class="breadcrumb-sectionProfile set-bg" data-setbg="img/banner-profile.jpg">
+	<div class="container-profile">
+		<div class="row gutters">
+			<div class="col-xl-2 col-lg-2 col-md-12 col-sm-12 col-12">
+				<div class="card h-100">
+					<div class="card-body">
+						<div class="account-settings">
+							<div class="user-profile">
+								<div class="user-avatar">
+									<img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="Maxwell Admin">
+								</div>
+
+								<h5 class="user-name">@Model.FirstName @Model.LastName</h5>
+								<h6 class="user-email">@Model.Email</h6>
+							</div>
+							<div class="about">
+								<ul class="nav nav-list flex-column mb-5">
+									<li class="nav-item"><a href="@Url.Action("UserDiagram","Profile")" class="nav-link">User Dashboard</a></li>
+									<li class="nav-item"><a href="@Url.Action("UserProfile","Profile")" class="nav-link">User Profile</a></li>
+									<li class="nav-item"><a href="@Url.Action("UserPlan","Profile")" class="nav-link">Plan</a></li>
+									<li class="nav-item"><a href="@Url.Action("UserOrder","Profile")" class="nav-link">Order</a></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-xl-10 col-lg-10 col-md-12 col-sm-12 col-12">
+				<div class="card h-100">
+					<div class="card-body">
+						<input value="@ViewBag.progess" class="hidden-field" id="goalID" />
+						<div style="width: 1100px; height: 400px">
+							<canvas id="myChart" width="1100" height="400"></canvas>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@next/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        const makeRequest = async () => {
+            func2(await func1())
+        }
+
+        makeRequest()
+
+        function func1() {
+            let dataFill = [];
+            var goalProgess = $("#goalID").val();
+            var list = goalProgess.split('--');
+
+            for (var i = 0; i < list.length; i++) {
+                var dateTemp = list[i].substring(0, list[i].indexOf("-"));
+                var weight = Number(list[i].substring(list[i].indexOf("-") + 1));
+                var date = convertDate(dateTemp);
+                if (dateTemp != "" && weight != "") {
+                    dataFill.push({ x:date, y:weight })
+                }
+            }
+            console.log(dataFill);
+            return dataFill;
+        }
+
+
+        function convertDate(str) {
+            var firstIndex = str.indexOf("/");
+            var lastIndex = str.lastIndexOf("/");
+            var month = str.substring(0, firstIndex);
+            var day = str.substring(firstIndex + 1, lastIndex);
+            if (day.length < 2) {
+                day = "0" + day;
+            }
+            if (month.length < 2) {
+                month = "0" + month;
+            }
+            var year = str.substring(lastIndex + 1, lastIndex + 5);
+            var date = year + "-" + month + "-" + day;
+            return date;
+        }
+
+        function func2(dataPass) {
+            let data = {
+                datasets: [{
+                    type: 'line',
+                    label: 'Weight',
+                    data: dataPass,
+                    borderColor: 'rgb(104,206,15)'
+                }],
+
+            }
+
+            let option = {
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            borderColor: 'rgb(243,243,242)',
+                            color: 'rgba(255,255,255,0.5)',
+                        },
+                        ticks: {
+                            color: '#fff'
+                        },
+                    },
+                    x: {
+                        grid: {
+                            borderColor: 'rgb(243,243,242)',
+                            color: 'rgba(255,255,255,0.5)',
+                        },
+                        ticks: {
+                            color: '#fff'
+                        },
+                        title: {
+                            color: 'white',
+                            display: true,
+                        },
+                        type: 'time',
+                        time: {
+                            unit: 'week'
+                        }
+                    },
+                }
+            }
+
+            let ctx = document.getElementById('myChart');
+            let config = {
+                type: 'line',
+                data: data,
+                options: option
+            }
+            let myChart = new Chart(ctx, config);
+        }
+
+    })
+</script>
+@section title{
+	<title>Dashboard</title>
+}
